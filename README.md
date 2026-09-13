@@ -1,2 +1,69 @@
 # terraform-azure-modules
-Reusable, independently versioned Terraform modules for Azure, consumed by the MicroTodoSuite live infrastructure repositories.
+
+Reusable Terraform modules for Azure. The MicroTodoSuite live repositories
+consume them by tag. GaCode Solutions maintains them for the MicroTodoSuite
+platform it operates for Lexfield Legal.
+
+The modules serve the Azure disaster-recovery domain (gitops
+`specs/009-full-platform-rollout` user story 5), which the program sequences
+after the AWS rebuild.
+
+Each top-level directory is one module with a single responsibility, and each
+module is versioned on its own (MTS-IAC-102). A change to one module never
+forces a consumer of another to move.
+
+## Consuming a module
+
+Always use the full Git URL and an exact module tag:
+
+```hcl
+module "identity" {
+  source = "git::https://github.com/MicroTodoSuite/terraform-azure-modules.git//<module>?ref=<module>-v1.0.0"
+
+  providers = {
+    azurerm.project = azurerm.principal
+  }
+
+  # Names arrive built by the root (PC-IAC-025); governance codes feed tags.
+  client      = var.client
+  project     = var.project
+  environment = var.environment
+}
+```
+
+Modules configure no provider. They receive `azurerm.project` from the
+consuming root (PC-IAC-005). The root's provider block carries the
+`features {}` block, the subscription, and `resource_provider_registrations`,
+which azurerm 5.0 defaults to `none`. The Azure provider has no default tags,
+so each module applies the governance tags itself.
+
+## Versions and releases
+
+- Tags have the form `<module>-v<MAJOR>.<MINOR>.<PATCH>`, for example
+  `aks-cluster-v1.2.0`.
+- Commits that touch a module use the module's name as the Conventional Commit
+  scope, for example `feat(aks-cluster): ...`. A `BREAKING CHANGE` footer
+  produces a major version. A commit touches one module only.
+- release-please, in manifest mode, opens a release pull request per module
+  from merged commits and keeps each module's `CHANGELOG.md`. A new module is
+  registered in `release-please-config.json` in its own pull request.
+
+## Adding a module
+
+Copy `_template/`, rename it, and fill every file. The template follows
+PC-IAC-001: `versions.tf`, `providers.tf`, `variables.tf`, `locals.tf`,
+`data.tf`, `main.tf`, `outputs.tf`, `README.md`, `CHANGELOG.md`, a runnable
+`sample/`, and `tests/` with `terraform test` files against a mocked provider.
+
+## Checks
+
+Every pull request runs the organization's reusable `iac-checks` gate:
+- the rule contracts;
+- `terraform fmt`;
+- `terraform test` for each module;
+- `terraform validate` for each sample;
+- tflint;
+- Trivy, failing on HIGH and CRITICAL findings.
+
+A finding is waived only by a row, with a reason and an expiry, in
+`docs/iac-exceptions.md`. The rules are in `microservice-app-ai-agents/rules/iac/`.

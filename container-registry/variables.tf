@@ -38,7 +38,7 @@ variable "container_registry" {
     location            = string
     sku                 = string
   })
-  description = "Separator-free, globally unique name of the registry (built by the root), its resource group and programmatic region, and its SKU."
+  description = "Separator-free, globally unique name of the registry (built by the root), its resource group and programmatic region, and its SKU, which must be Premium: only Premium registries take network rules."
 
   validation {
     condition     = can(regex("^[a-z0-9]{5,50}$", var.container_registry.name))
@@ -46,8 +46,25 @@ variable "container_registry" {
   }
 
   validation {
-    condition     = length(var.container_registry.resource_group_name) > 0 && can(regex("^[a-z][a-z0-9]+$", var.container_registry.location)) && contains(["Basic", "Standard", "Premium"], var.container_registry.sku)
-    error_message = "The registry needs a resource group, a programmatic region name, and a SKU of Basic, Standard, or Premium."
+    condition     = length(var.container_registry.resource_group_name) > 0 && can(regex("^[a-z][a-z0-9]+$", var.container_registry.location))
+    error_message = "The registry needs a resource group and a programmatic region name."
+  }
+
+  validation {
+    condition     = var.container_registry.sku == "Premium"
+    error_message = "The registry must be Premium: network rules, and so a registry closed by default, exist only on the Premium SKU."
+  }
+}
+
+variable "network_access" {
+  type = object({
+    allowed_ip_cidrs = list(string)
+  })
+  description = "What passes the registry firewall besides trusted Azure services: /32 addresses, such as the operators' and the cluster's static egress address. Everything else is denied."
+
+  validation {
+    condition     = alltrue([for cidr in var.network_access.allowed_ip_cidrs : can(cidrhost(cidr, 0)) && endswith(cidr, "/32")])
+    error_message = "Firewall addresses must be /32 blocks; 0.0.0.0/0 and ranges are refused."
   }
 }
 

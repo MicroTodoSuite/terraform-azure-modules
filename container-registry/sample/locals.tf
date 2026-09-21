@@ -6,6 +6,10 @@ locals {
     name                = "${local.compact_prefix}acrsample"
     resource_group_name = var.resource_group_name
     location            = var.location
-    sku                 = "Basic"
+    sku                 = "Premium"
+  }
+
+  network_access = {
+    allowed_ip_cidrs = var.operator_cidrs
   }
 }

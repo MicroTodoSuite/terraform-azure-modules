@@ -60,6 +60,11 @@ run "creates_an_encrypted_entra_only_account" {
   }
 
   assert {
+    condition     = azurerm_storage_account.this.identity[0].type == "SystemAssigned"
+    error_message = "The account must carry a system-assigned managed identity (SonarCloud S6378)."
+  }
+
+  assert {
     condition     = azurerm_storage_account.this.blob_properties[0].versioning_enabled == true && azurerm_storage_account.this.blob_properties[0].delete_retention_policy[0].days == 30 && azurerm_storage_account.this.blob_properties[0].container_delete_retention_policy[0].days == 30
     error_message = "The account must keep blob versions and soft-delete blobs and containers for the requested days."
   }

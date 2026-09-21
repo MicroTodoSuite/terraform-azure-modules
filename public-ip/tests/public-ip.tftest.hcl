@@ -51,6 +51,35 @@ run "creates_a_standard_static_address_with_a_tenant_scoped_label" {
   }
 }
 
+run "creates_an_address_without_a_label" {
+  command = plan
+
+  providers = {
+    azurerm.project = azurerm.project
+  }
+
+  # An egress address needs no DNS name; without a label there is no scope
+  # either.
+  variables {
+    public_ip = {
+      name                = "lex-mts-fprd-pip-egress"
+      resource_group_name = "lex-mts-fprd-rg-ingress"
+      location            = "eastus2"
+      domain_name_label   = null
+    }
+  }
+
+  assert {
+    condition     = azurerm_public_ip.this.name == "lex-mts-fprd-pip-egress" && azurerm_public_ip.this.sku == "Standard" && azurerm_public_ip.this.allocation_method == "Static"
+    error_message = "An address without a label must still be a Standard static address."
+  }
+
+  assert {
+    condition     = azurerm_public_ip.this.domain_name_label == null && azurerm_public_ip.this.domain_name_label_scope == null
+    error_message = "An address without a label must carry neither a label nor a label scope."
+  }
+}
+
 run "rejects_an_invalid_dns_label" {
   command = plan
 

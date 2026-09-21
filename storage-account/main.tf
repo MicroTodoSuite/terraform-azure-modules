@@ -38,6 +38,10 @@ resource "azurerm_storage_account" "this" {
     }
   }
 
+  identity {
+    type = "SystemAssigned"
+  }
+
   tags = merge(local.tags, { Name = var.storage_account.name })
 
   lifecycle {

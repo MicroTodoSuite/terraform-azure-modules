@@ -20,6 +20,9 @@
     },
     "key-vault": {
       "component": "key-vault"
+    },
+    "container-registry": {
+      "component": "container-registry"
     }
   }
 }

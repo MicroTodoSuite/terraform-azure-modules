@@ -23,6 +23,9 @@
     },
     "container-registry": {
       "component": "container-registry"
+    },
+    "storage-account": {
+      "component": "storage-account"
     }
   }
 }

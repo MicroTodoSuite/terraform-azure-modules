@@ -11,6 +11,9 @@
   "protected_resources": {
     "key-vault": [
       "azurerm_key_vault.this"
+    ],
+    "storage-account": [
+      "azurerm_storage_account.this"
     ]
   }
 }

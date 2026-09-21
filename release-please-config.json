@@ -29,6 +29,9 @@
     },
     "public-ip": {
       "component": "public-ip"
+    },
+    "aks-cluster": {
+      "component": "aks-cluster"
     }
   }
 }

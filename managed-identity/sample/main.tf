@@ -10,4 +10,5 @@ module "identity" {
   project     = var.project
   environment = var.environment
   identity    = local.identity
+  custom_role = null
 }

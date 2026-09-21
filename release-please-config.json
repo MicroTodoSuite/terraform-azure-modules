@@ -11,6 +11,9 @@
   "packages": {
     "resource-group": {
       "component": "resource-group"
+    },
+    "network": {
+      "component": "network"
     }
   }
 }

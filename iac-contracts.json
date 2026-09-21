@@ -1,4 +1,9 @@
 {
-  "module_owners": {},
+  "module_owners": {
+    "network": [
+      "azurerm_virtual_network",
+      "azurerm_subnet"
+    ]
+  },
   "protected_resources": {}
 }

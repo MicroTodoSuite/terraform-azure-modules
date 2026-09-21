@@ -1,7 +1,8 @@
 # public-ip
 
-One Standard SKU static IPv4 address with a DNS label scoped to the tenant
-(`TenantReuse`), so no other tenant can claim the FQDN. Terraform owns the
+One Standard SKU static IPv4 address, with an optional DNS label scoped to the
+tenant (`TenantReuse`), so no other tenant can claim the FQDN. An address
+without a label, such as a cluster's egress address, has no FQDN. Terraform owns the
 address; an AKS LoadBalancer Service selects it with the
 `service.beta.kubernetes.io/azure-pip-name` and
 `service.beta.kubernetes.io/azure-load-balancer-resource-group` annotations and
@@ -13,7 +14,7 @@ on the address's resource group.
 | Name | Description |
 | --- | --- |
 | `client`, `project`, `environment` | Governance codes (MTS-IAC-101). |
-| `public_ip` | `name`, `resource_group_name`, `location`, `domain_name_label`. |
+| `public_ip` | `name`, `resource_group_name`, `location`, `domain_name_label` (optional). |
 | `additional_tags` | Tags besides the governance tags. |
 
 ## Outputs

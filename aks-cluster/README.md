@@ -13,7 +13,8 @@ One AKS cluster:
   Entra identity;
 - an API allowlist of `/32` addresses, never `0.0.0.0/0`;
 - nodes in the given private subnet without public addresses, leaving through
-  the Standard Load Balancer;
+  the Standard Load Balancer, optionally from Terraform-owned static outbound
+  addresses that firewalls can admit;
 - the given control-plane and kubelet identities — the cluster creates none;
 - a cluster autoscaler bounded so `max_count * vcpus` fits the regional vCPU
   quota, with node auto-provisioning off.
@@ -30,7 +31,7 @@ LoadBalancer Service uses. Grant them with `managed-identity`.
 | `client`, `project`, `environment` | Governance codes (MTS-IAC-101). |
 | `cluster` | `name`, `resource_group_name`, `location`, `kubernetes_version`. |
 | `identities` | `cluster_identity_id` and `kubelet = {id, client_id, object_id}`. |
-| `network` | `subnet_id`, `vnet_cidr`, `pod_cidr`, `service_cidr`, `dns_service_ip`, `reserved_cidrs`. |
+| `network` | `subnet_id`, `vnet_cidr`, `pod_cidr`, `service_cidr`, `dns_service_ip`, `reserved_cidrs`, and optional `outbound_public_ip_ids`. |
 | `api_server_authorized_ip_ranges` | `/32` operator addresses. |
 | `system_node_pool` | `vm_size`, `vcpus`, `min_count`, `max_count`. |
 | `regional_vcpu_quota` | The quota `max_count * vcpus` must fit. |

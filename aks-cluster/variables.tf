@@ -78,18 +78,24 @@ variable "identities" {
 
 variable "network" {
   type = object({
-    subnet_id      = string
-    vnet_cidr      = string
-    pod_cidr       = string
-    service_cidr   = string
-    dns_service_ip = string
-    reserved_cidrs = list(string)
+    subnet_id              = string
+    vnet_cidr              = string
+    pod_cidr               = string
+    service_cidr           = string
+    dns_service_ip         = string
+    reserved_cidrs         = list(string)
+    outbound_public_ip_ids = optional(list(string), [])
   })
-  description = "The private node subnet, the address space of its VNet, the Azure CNI Overlay pod range, the service range and DNS address, and the connected networks (every AWS VPC) the pod and service ranges must not overlap."
+  description = "The private node subnet, the address space of its VNet, the Azure CNI Overlay pod range, the service range and DNS address, the connected networks (every AWS VPC) the pod and service ranges must not overlap, and optionally the Terraform-owned Standard public IPs the cluster load balancer leaves through, so firewalls can admit the cluster by address. The control-plane identity needs Network Contributor on their resource group."
 
   validation {
     condition     = can(regex("^/subscriptions/[0-9a-f-]{36}/resourceGroups/[^/]+/providers/Microsoft.Network/virtualNetworks/[^/]+/subnets/[^/]+$", var.network.subnet_id))
     error_message = "The node subnet must be a subnet resource ID."
+  }
+
+  validation {
+    condition     = alltrue([for id in var.network.outbound_public_ip_ids : can(regex("^/subscriptions/[0-9a-f-]{36}/resourceGroups/[^/]+/providers/Microsoft.Network/publicIPAddresses/[^/]+$", id))])
+    error_message = "Outbound addresses must be public IP resource IDs."
   }
 
   validation {

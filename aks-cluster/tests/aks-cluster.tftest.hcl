@@ -39,6 +39,9 @@ variables {
     service_cidr   = "172.16.0.0/16"
     dns_service_ip = "172.16.0.10"
     reserved_cidrs = ["10.10.0.0/16", "10.20.0.0/16", "10.30.0.0/16", "10.40.0.0/16", "10.50.0.0/16"]
+    outbound_public_ip_ids = [
+      "/subscriptions/00000000-0000-0000-0000-00000000d0d0/resourceGroups/lex-mts-fprd-rg-ingress/providers/Microsoft.Network/publicIPAddresses/lex-mts-fprd-pip-egress",
+    ]
   }
   api_server_authorized_ip_ranges = [
     "181.50.102.191/32",
@@ -86,6 +89,11 @@ run "creates_an_overlay_cilium_cluster" {
   assert {
     condition     = azurerm_kubernetes_cluster.this.network_profile[0].outbound_type == "loadBalancer" && azurerm_kubernetes_cluster.this.network_profile[0].load_balancer_sku == "standard"
     error_message = "Nodes must leave through the cluster's Standard Load Balancer, the explicit path a private subnet needs."
+  }
+
+  assert {
+    condition     = tolist(azurerm_kubernetes_cluster.this.network_profile[0].load_balancer_profile[0].outbound_ip_address_ids) == tolist(var.network.outbound_public_ip_ids)
+    error_message = "The load balancer must leave through the given static egress addresses, so firewalls can admit the cluster by address."
   }
 
   assert {
@@ -153,6 +161,28 @@ run "runs_as_the_given_identities_in_the_given_subnet" {
     condition     = azurerm_kubernetes_cluster.this.node_provisioning_profile[0].mode == "Manual" && azurerm_kubernetes_cluster.this.default_node_pool[0].auto_scaling_enabled == true && azurerm_kubernetes_cluster.this.default_node_pool[0].min_count == 1 && azurerm_kubernetes_cluster.this.default_node_pool[0].max_count == 3 && azurerm_kubernetes_cluster.this.default_node_pool[0].vm_size == "Standard_D2s_v5"
     error_message = "Capacity must be the bounded cluster autoscaler on the reviewed size, with node auto-provisioning off."
   }
+}
+
+run "rejects_a_malformed_outbound_address_id" {
+  command = plan
+
+  providers = {
+    azurerm.project = azurerm.project
+  }
+
+  variables {
+    network = {
+      subnet_id              = "/subscriptions/00000000-0000-0000-0000-00000000d0d0/resourceGroups/lex-mts-fprd-rg-network/providers/Microsoft.Network/virtualNetworks/lex-mts-fprd-vnet-dr/subnets/lex-mts-fprd-snet-nodes"
+      vnet_cidr              = "10.70.0.0/16"
+      pod_cidr               = "192.168.0.0/16"
+      service_cidr           = "172.16.0.0/16"
+      dns_service_ip         = "172.16.0.10"
+      reserved_cidrs         = ["10.10.0.0/16"]
+      outbound_public_ip_ids = ["lex-mts-fprd-pip-egress"]
+    }
+  }
+
+  expect_failures = [var.network]
 }
 
 run "rejects_another_kubernetes_minor" {

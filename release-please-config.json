@@ -14,6 +14,9 @@
     },
     "network": {
       "component": "network"
+    },
+    "managed-identity": {
+      "component": "managed-identity"
     }
   }
 }

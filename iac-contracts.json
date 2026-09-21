@@ -8,5 +8,9 @@
       "azurerm_role_assignment"
     ]
   },
-  "protected_resources": {}
+  "protected_resources": {
+    "key-vault": [
+      "azurerm_key_vault.this"
+    ]
+  }
 }

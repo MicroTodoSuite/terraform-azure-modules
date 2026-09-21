@@ -17,6 +17,9 @@
     },
     "managed-identity": {
       "component": "managed-identity"
+    },
+    "key-vault": {
+      "component": "key-vault"
     }
   }
 }

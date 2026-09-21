@@ -12,9 +12,9 @@ resource "azurerm_container_registry" "this" {
   admin_enabled          = false
   anonymous_pull_enabled = false
 
-  # The firewall needs the public endpoint; it admits only the named addresses.
-  public_network_access_enabled = true
-  network_rule_bypass_option    = "AzureServices"
+  # The public endpoint stays at the provider default so the firewall can admit
+  # the named addresses; the rule set below denies everything else.
+  network_rule_bypass_option = "AzureServices"
 
   network_rule_set {
     default_action = "Deny"

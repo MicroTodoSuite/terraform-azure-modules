@@ -26,6 +26,9 @@
     },
     "storage-account": {
       "component": "storage-account"
+    },
+    "public-ip": {
+      "component": "public-ip"
     }
   }
 }

@@ -12,9 +12,15 @@ resource "azurerm_container_registry" "this" {
   admin_enabled          = false
   anonymous_pull_enabled = false
 
-  # The public endpoint stays at the provider default so the firewall can admit
-  # the named addresses; the rule set below denies everything else.
-  network_rule_bypass_option = "AzureServices"
+  # The public endpoint stays on, and SonarCloud terraform:S6329 reports it: the
+  # registry is accepted with it rather than fixed (README, "Network exposure").
+  # Turning it off overrides the firewall and leaves only private endpoints,
+  # which neither the AKS nodes nor the GitHub-hosted mirror runners reach
+  # without a private link the disaster-recovery estate does not have. The rule
+  # set below denies every other address; ACR Tasks get no bypass.
+  public_network_access_enabled         = true
+  network_rule_bypass_option            = "AzureServices"
+  network_rule_bypass_for_tasks_enabled = false
 
   network_rule_set {
     default_action = "Deny"

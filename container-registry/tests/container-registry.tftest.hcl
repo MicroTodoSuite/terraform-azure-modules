@@ -76,6 +76,16 @@ run "denies_network_access_by_default" {
     condition     = azurerm_container_registry.this.network_rule_bypass_option == "AzureServices"
     error_message = "Trusted Azure services, such as a registry import, must still reach the registry."
   }
+
+  assert {
+    condition     = azurerm_container_registry.this.network_rule_bypass_for_tasks_enabled == false
+    error_message = "ACR Tasks must not bypass the registry firewall."
+  }
+
+  assert {
+    condition     = azurerm_container_registry.this.public_network_access_enabled == true && azurerm_container_registry.this.network_rule_set[0].default_action == "Deny"
+    error_message = "The public endpoint is the accepted exposure only behind a firewall that denies by default."
+  }
 }
 
 run "rejects_a_sku_without_network_rules" {

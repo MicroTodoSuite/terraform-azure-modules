@@ -8,6 +8,35 @@ address). Registry network rules exist only on the Premium SKU. Grant `AcrPull` 
 `AcrPush` through `managed-identity` role assignments scoped to
 `container_registry_id`.
 
+## Network exposure
+
+The registry keeps its public endpoint (`public_network_access_enabled = true`),
+and SonarCloud reports `terraform:S6329` on it. The finding is accepted, not
+fixed:
+
+- Disabling public access overrides the firewall and leaves the registry
+  reachable only through private endpoints and trusted Azure services. The AKS
+  nodes would need a private endpoint and its private DNS zone, which no module
+  of the disaster-recovery estate provides. The mirror jobs that copy signed
+  images from ECR (`mirror-to-acr`, `mirror-platform-images`) run on
+  GitHub-hosted runners, which cannot reach a private endpoint at all. GitHub
+  Actions is not one of the registry's trusted services.
+- Private endpoints and IP rules both need the Premium SKU. Basic and Standard
+  cannot restrict network access at all, so the module refuses them.
+
+The controls that apply with the endpoint on:
+
+- The firewall denies by default and admits only the `/32` addresses the root
+  names. The module refuses `0.0.0.0/0` and ranges.
+- Only trusted Azure services, such as a registry import or Microsoft Defender,
+  bypass the firewall. ACR Tasks do not.
+- There is no admin user and no anonymous pull, so every request authenticates
+  with an Entra identity that holds `AcrPull` or `AcrPush`.
+
+Until the decision is recorded as a row in `docs/iac-exceptions.md` through its
+own reviewed pull request, the registry carries no `NOSONAR`. Once the row
+exists, a `NOSONAR` comment on the line SonarCloud reports cites it.
+
 ## Inputs
 
 | Name | Description |

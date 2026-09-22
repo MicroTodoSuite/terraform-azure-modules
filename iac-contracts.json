@@ -1,4 +1,19 @@
 {
-  "module_owners": {},
-  "protected_resources": {}
+  "module_owners": {
+    "network": [
+      "azurerm_virtual_network",
+      "azurerm_subnet"
+    ],
+    "managed-identity": [
+      "azurerm_role_assignment"
+    ]
+  },
+  "protected_resources": {
+    "key-vault": [
+      "azurerm_key_vault.this"
+    ],
+    "storage-account": [
+      "azurerm_storage_account.this"
+    ]
+  }
 }

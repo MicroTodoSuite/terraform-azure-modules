@@ -5,4 +5,3 @@ environment         = "fprd"
 subscription_id     = ""
 location            = "eastus2"
 resource_group_name = ""
-operator_cidrs      = []

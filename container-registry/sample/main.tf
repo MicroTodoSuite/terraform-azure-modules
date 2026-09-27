@@ -10,5 +10,4 @@ module "container_registry" {
   project            = var.project
   environment        = var.environment
   container_registry = local.container_registry
-  network_access     = local.network_access
 }

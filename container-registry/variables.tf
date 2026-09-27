@@ -38,7 +38,7 @@ variable "container_registry" {
     location            = string
     sku                 = string
   })
-  description = "Separator-free, globally unique name of the registry (built by the root), its resource group and programmatic region, and its SKU, which must be Premium: only Premium registries take network rules."
+  description = "Separator-free, globally unique name of the registry (built by the root), its resource group and programmatic region, and its SKU, which must be Standard: Premium costs about USD 50 per 30 days against the USD 100, 12-month Azure for Students credit, and its IP rules cannot admit the GitHub-hosted mirror runners, which have no fixed egress address; Basic includes 10 GiB of storage against the 100 GiB of Standard. Access is by Entra identity alone."
 
   validation {
     condition     = can(regex("^[a-z0-9]{5,50}$", var.container_registry.name))
@@ -51,20 +51,8 @@ variable "container_registry" {
   }
 
   validation {
-    condition     = var.container_registry.sku == "Premium"
-    error_message = "The registry must be Premium: network rules, and so a registry closed by default, exist only on the Premium SKU."
-  }
-}
-
-variable "network_access" {
-  type = object({
-    allowed_ip_cidrs = list(string)
-  })
-  description = "What passes the registry firewall besides trusted Azure services: /32 addresses, such as the operators' and the cluster's static egress address. Everything else is denied."
-
-  validation {
-    condition     = alltrue([for cidr in var.network_access.allowed_ip_cidrs : can(cidrhost(cidr, 0)) && endswith(cidr, "/32")])
-    error_message = "Firewall addresses must be /32 blocks; 0.0.0.0/0 and ranges are refused."
+    condition     = var.container_registry.sku == "Standard"
+    error_message = "The registry must be Standard (lead decision of 2026-09-21): Premium exceeds the disaster-recovery budget and its IP rules would refuse the GitHub-hosted mirror runners."
   }
 }
 

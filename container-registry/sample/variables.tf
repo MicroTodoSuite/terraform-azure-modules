@@ -29,8 +29,3 @@ variable "resource_group_name" {
   type        = string
   description = "Existing resource group of the sample; empty in terraform.tfvars, where it is looked up (PC-IAC-026)."
 }
-
-variable "operator_cidrs" {
-  type        = list(string)
-  description = "Operator /32 addresses the sample registry admits."
-}

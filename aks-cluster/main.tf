@@ -72,7 +72,8 @@ resource "azurerm_kubernetes_cluster" "this" {
     outbound_type       = "loadBalancer"
 
     # With Terraform-owned outbound addresses, egress leaves from a known
-    # address that registry and vault firewalls can admit.
+    # address that firewalls such as the key vault's can admit. The Standard
+    # container registry has no firewall; it admits Entra identities only.
     dynamic "load_balancer_profile" {
       for_each = length(var.network.outbound_public_ip_ids) > 0 ? [var.network.outbound_public_ip_ids] : []
 
